@@ -1,0 +1,53 @@
+#!/usr/bin/env groovy
+
+import java.lang.ProcessBuilder.Redirect
+
+
+import static groovy.io.FileType.FILES
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+def homeDir = new File(getClass().protectionDomain.codeSource.location.path).parentFile.parentFile.getAbsolutePath() + '/';
+
+String VITAL_HOME = System.getenv('VITAL_HOME')
+
+if(!VITAL_HOME) { 
+
+System.err.println("VITAL_HOME environment variable not set.")
+System.exit(-1)
+}
+
+
+List jars = []
+
+
+new File(VITAL_HOME + "/vital-domain/").eachFileRecurse(FILES) {
+        if(it.name.endsWith('.jar')) {
+                jars.add(it.absolutePath)
+        }
+}
+
+new File(VITAL_HOME + "/domain-groovy-jar/").eachFileRecurse(FILES) {
+        if(it.name.endsWith('.jar')) {
+                jars.add(it.absolutePath)
+        }
+}
+
+
+new File(homeDir + "/target/").eachFileRecurse(FILES) {
+        if(it.name.equals('haley-local-server-3.2.1-fat.jar')) {
+                jars.add(it.absolutePath)
+        }
+}
+
+
+def mainClass = 'ai.haley.local.HaleyLocalServer'
+
+List cmd = ['java', '-cp', (String)jars.join(File.pathSeparator), mainClass]
+for(String a : args) {
+        cmd.add(a)
+}
+//println cmd
+
+def process=new ProcessBuilder(cmd).redirectErrorStream(true).redirectInput(Redirect.INHERIT).start()
+process.inputStream.eachLine {println it}

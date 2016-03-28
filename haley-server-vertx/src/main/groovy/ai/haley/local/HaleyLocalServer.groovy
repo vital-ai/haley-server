@@ -2,6 +2,13 @@ package ai.haley.local
 
 import java.net.URI
 import javax.websocket.ClientEndpoint
+
+import ai.vital.domain.*
+
+import com.vitalai.aimp.domain.*
+
+import ai.vital.vitalsigns.model.property.URIProperty
+
 import javax.websocket.CloseReason
 import javax.websocket.ContainerProvider
 import javax.websocket.OnClose
@@ -10,22 +17,47 @@ import javax.websocket.OnOpen
 import javax.websocket.Session
 import javax.websocket.WebSocketContainer
 
-import WebsocketClientEndpoint.MessageHandler;
+import WebsocketClientEndpoint.MessageHandler
 
-import java.net.URI
+import java.net.URI 
 import java.net.URISyntaxException
 
 
+import io.vertx.groovy.ext.web.Router
+import io.vertx.groovy.core.Vertx
+
+import ai.haley.local.message.MessageUtils
+
+import ai.haley.local.json.JSONUtils
+
+import ai.vital.vitalsigns.model.VitalApp;
+import ai.vital.vitalsigns.VitalSigns
+import ai.vital.vitalsigns.model.VITAL_Node
+import ai.vital.vitalsigns.model.*
+import ai.vital.vitalsigns.rdf.RDFFormat
+import ai.vital.vitalsigns.model.xsd
 
 public class HaleyLocalServer {
 
-
+	
 public static void main(String[] args) {
 
 
 println "Hello!"
 
 try {
+	
+	
+	def router = Router.router( Vertx.vertx() )
+	
+	router.route().handler({ routingContext ->
+	  routingContext.response().putHeader("content-type", "text/html").end("Hello World!")
+	})
+	
+	 Vertx.vertx().createHttpServer().requestHandler(router.&accept).listen(8888)
+	
+	
+	
 	// open websocket
 	final WebsocketClientEndpoint clientEndPoint = new WebsocketClientEndpoint(new URI("ws://localhost:8887/websocket/"))
 
@@ -81,13 +113,20 @@ try {
 		
 	}
 	
+	
+	
+	VitalSigns vs = VitalSigns.get()
+	
+	VitalApp app = new VitalApp(name: 'haley-local-server-app', appID: 'haley-local-server-app')
+	
+	vs.setCurrentApp(app)
+	
+	
 	println "Sending Message!"
 
 	// send message to websocket
-  
-	
+  	
    clientEndPoint.sendMessage("hello!")
-
 
  BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
@@ -95,7 +134,36 @@ try {
 
  String line = reader.readLine();
 
- clientEndPoint.sendMessage(line)
+ 
+ ChatMessage chat_msg = new ChatMessage().generateURI()
+ 
+ 
+ chat_msg.chatMessage = line
+ 
+ 
+ def msg = MessageUtils.messageTemplate("session1234", chat_msg.toJSON(), "payload")
+ 
+ 
+ /*
+ def msg_obj = JSONUtils.parseMessage(msg)
+ 
+ boolean valid = MessageUtils.validateMessage(msg_obj)
+ 
+ 
+ if(valid) {
+	 println "Message is valid."
+ }
+ else { 
+	 println "Message is invalid!" 
+ }
+ 
+ 
+ //def msg_string = JSONUtils.encodeMessage(msg)
+ 
+ */
+ 
+ 
+ clientEndPoint.sendMessage(msg)
 
  }
  

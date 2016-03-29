@@ -28,6 +28,9 @@ import io.vertx.groovy.core.Vertx
 
 import ai.haley.local.message.MessageUtils
 
+import ai.haley.local.config.HaleyLocalServerConfig
+
+
 import ai.haley.local.json.JSONUtils
 
 import ai.vital.vitalsigns.model.VitalApp;
@@ -46,6 +49,12 @@ public static void main(String[] args) {
 println "Hello!"
 
 try {
+	
+	// config file
+	
+	HaleyLocalServerConfig.init()
+	
+	
 	
 	
 	def router = Router.router( Vertx.vertx() )

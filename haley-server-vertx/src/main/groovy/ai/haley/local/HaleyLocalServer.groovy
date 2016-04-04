@@ -31,6 +31,10 @@ import ai.haley.local.message.MessageUtils
 import ai.haley.local.config.HaleyLocalServerConfig
 
 
+import ai.haley.local.plugins.HaleyPluginManager
+
+
+
 import ai.haley.local.json.JSONUtils
 
 import ai.vital.vitalsigns.model.VitalApp;
@@ -54,6 +58,8 @@ try {
 	
 	HaleyLocalServerConfig.init()
 	
+	
+	HaleyPluginManager.init()
 	
 	
 	

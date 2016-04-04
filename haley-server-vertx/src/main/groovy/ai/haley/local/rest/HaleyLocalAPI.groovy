@@ -13,6 +13,8 @@ class HaleyLocalAPI {
 	// list, register, unregister, status of device
 	
 	// plugins
+	// list, update, add form repo, remove, get list from repo
+	
 	
 	// session status with Haley
 	

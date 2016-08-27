@@ -1,3 +1,0 @@
-haley-embedded-vertx
-====================
-

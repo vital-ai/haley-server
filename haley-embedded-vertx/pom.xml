@@ -16,7 +16,7 @@
     
  
      
-        <vital.version>0.2.302</vital.version>
+        <vital.version>0.2.304</vital.version>
  
     
     
@@ -24,6 +24,9 @@
 
 
  <repositories>
+  
+  
+  
   
  <repository>
     <id>vital-public-mvn-repo-releases</id>
@@ -40,6 +43,18 @@
   </repositories>
 
   <dependencies>
+  
+  <dependency>
+  <groupId>jline</groupId>
+  <artifactId>jline</artifactId>
+  <version>2.12</version>
+</dependency>
+
+  <dependency>
+   <groupId>ai.haley</groupId>
+  <artifactId>haley-client-groovy</artifactId>
+  <version>3.2.1</version>
+  </dependency>
   
   <!--  
    <dependency>
@@ -110,6 +125,8 @@
         <version>1.4.8</version>
   </dependency>
   
+  
+ 
   
   
   

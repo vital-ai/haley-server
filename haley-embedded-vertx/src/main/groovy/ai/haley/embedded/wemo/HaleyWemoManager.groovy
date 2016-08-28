@@ -3,13 +3,16 @@ package ai.haley.embedded.wemo
 class HaleyWemoManager {
 
 	
+	public static String wemoBinary = "/anaconda/bin/wemo"
+	
+	
 	
 	public static List<String> listDevices() {
 		
 		def devices = []
 		
 		
-		List cmd = ["/anaconda/bin/wemo", "list"]
+		List cmd = [wemoBinary, "list"]
 		
 	def process=new ProcessBuilder(cmd).redirectErrorStream(true).start()
 	process.inputStream.eachLine {devices.add( it )}
@@ -24,7 +27,7 @@ class HaleyWemoManager {
 		// check status first
 		
 		
-		def cmd  = ["/anaconda/bin/wemo", "switch", name, "on"]
+		def cmd  = [wemoBinary, "switch", name, "on"]
 		
 		String status
 		
@@ -45,7 +48,7 @@ class HaleyWemoManager {
 		// check status first
 		
 		
-		def cmd  = ["/anaconda/bin/wemo", "switch", name, "off"]
+		def cmd  = [wemoBinary, "switch", name, "off"]
 		
 		String status
 		
@@ -62,7 +65,7 @@ class HaleyWemoManager {
 	public static String deviceStatus(String name) {
 		
 		
-		List cmd  = ["/anaconda/bin/wemo", "-v", "switch", name, "status"]
+		List cmd  = [wemoBinary, "-v", "switch", name, "status"]
 		
 		String status
 		

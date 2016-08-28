@@ -1,55 +1,60 @@
 <html>
 <head>
   <title></title>
-  <!--  
-  <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-  -->
-  <script src="js/jquery-1.11.2.min.js"></script>
   
-   <!-- 
-  <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
-   -->
-   
-  <script src="js/sockjs.min.js"></script>
-  <script src="js/vertx-eventbus.js"></script>
 </head>
 
 <style>
-  .news {
-    font-size: 20pt;
-  }
+  
 </style>
 
 <body>
 
-<div class="news">Latest news:</div>
-<br>
+Hello World of Devices!<p>
 
-<div id="status" class="news"></div>
+
+<form>
+
+<input id="turnOn" type="button" value="turnOn" onclick="doTurnOnDevice();" />
+
+
+<input id="turnOff" type="button" value="turnOff" onclick="doTurnOffDevice();" />
+
+</form>
 
 <script>
-  var eb = new EventBus('http://localhost:8888/eventbus');
-  
-  
-  eb.onopen = function () {
-   
-	  
-	 // eb.registerHandler('news-feed', function (err, msg) {
-     // var str = "<code>" + msg.body + "</code><br>";
-     // $('#status').prepend(str);
-    //})
-    
- // set a handler to receive a message
-    eb.registerHandler('some-address', function(error, message) {
-      console.log('received a message: ' + JSON.stringify(message));
-    });
-    
-    
-    // send a message
-    eb.send('some-address', {name: 'tim', age: 587});
-    
-  }
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "http://localhost:8888/devices", false);
+xhr.send();
+
+console.log(xhr.status);
+console.log(xhr.statusText);
+console.log(xhr.responseText);
+
 </script>
+
+
+<script>
+function doTurnOnDevice() {
+	
+	xmlhttp = new XMLHttpRequest();
+	var url = "http://localhost:8888/devices/Wemo%20Insight/on";
+	xmlhttp.open("POST", url, false);
+	 xmlhttp.send();
+};
+
+function doTurnOffDevice() {
+	
+	xmlhttp = new XMLHttpRequest();
+	var url = "http://localhost:8888/devices/Wemo%20Insight/off";
+	xmlhttp.open("POST", url, false);
+	 xmlhttp.send();
+	
+};
+
+</script>
+
 
 
 </body>

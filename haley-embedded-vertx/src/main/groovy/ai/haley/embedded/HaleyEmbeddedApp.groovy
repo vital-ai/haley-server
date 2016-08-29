@@ -319,6 +319,96 @@ static void onChannelObtained() {
 		println "HALEY SAYS: ${m?.text}"
 		
 		
+		// the user text messages to be replaced with sending aimp messages back
+		
+		
+		if(m.isSubTypeOf(DeviceMessage)) {
+			
+			println "got device message"
+			
+			if(m.isaType(DeviceActivateMessage)) {
+				println "activating"
+				
+				HaleyWemoManager.turnOnDevice("WeMo Insight")
+				
+				
+				UserTextMessage utm = new UserTextMessage()
+				utm.text = "I turned on the light."
+				utm.channelURI = channel.URI
+				
+				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+					
+					println "send text message status: ${sendStatus}"
+					
+				}
+				
+				
+			}
+			
+			if(m.isaType(DeviceDeactivateMessage)) {
+			
+				println "deactivating"
+				
+				HaleyWemoManager.turnOffDevice("WeMo Insight")
+				
+				
+				UserTextMessage utm = new UserTextMessage()
+				utm.text = "I turned off the light."
+				utm.channelURI = channel.URI
+				
+				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+					
+					println "send text message status: ${sendStatus}"
+					
+				}
+				
+				
+				
+			
+			}
+			if(m.isaType(DeviceStatusMessage)) {
+			
+				println "status"
+				
+				
+				def stat = HaleyWemoManager.deviceStatus("Wemo Insight")
+				
+				if(stat == "on") {
+					
+					UserTextMessage utm = new UserTextMessage()
+					utm.text = "The light is on."
+					utm.channelURI = channel.URI
+					
+					haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+						
+						println "send text message status: ${sendStatus}"
+						
+					}
+					
+				
+					
+				}
+				else {
+					UserTextMessage utm = new UserTextMessage()
+					utm.text = "The light is off."
+					utm.channelURI = channel.URI
+					
+					haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+						
+						println "send text message status: ${sendStatus}"
+						
+					}
+					
+				}
+				
+				
+			
+			}
+			
+			
+		}
+		
+		
 		String message = m?.text
 		
 		if(message.equals("list devices")) {
@@ -342,6 +432,7 @@ static void onChannelObtained() {
 		
 		if(message.equals("turn on the light")) {
 
+			/*
 			HaleyWemoManager.turnOnDevice("WeMo Insight")
 			
 			
@@ -354,12 +445,14 @@ static void onChannelObtained() {
 				println "send text message status: ${sendStatus}"
 				
 			}
+			*/
 			
 			
 		}
 		
 		if(message.equals("turn off the light")) {
 			
+			/*
 			HaleyWemoManager.turnOffDevice("WeMo Insight")
 			
 			
@@ -372,12 +465,14 @@ static void onChannelObtained() {
 				println "send text message status: ${sendStatus}"
 				
 			}
+			*/
 			
 		}
 		
 		if(message.equals("is the light on?")) {
 		
 	
+			/*
 			def stat = HaleyWemoManager.deviceStatus("Wemo Insight")
 			
 			if(stat == "on") {
@@ -392,6 +487,7 @@ static void onChannelObtained() {
 					
 				}
 				
+			
 				
 			}
 			else {
@@ -406,6 +502,8 @@ static void onChannelObtained() {
 				}
 				
 			}
+			*/
+			
 				
 	}
 		

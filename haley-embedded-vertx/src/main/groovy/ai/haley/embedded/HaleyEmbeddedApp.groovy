@@ -332,11 +332,20 @@ static void onChannelObtained() {
 				HaleyWemoManager.turnOnDevice("WeMo Insight")
 				
 				
-				UserTextMessage utm = new UserTextMessage()
-				utm.text = "I turned on the light."
-				utm.channelURI = channel.URI
+				DeviceStateChangeMessage dscm = new DeviceStateChangeMessage().generateURI()
 				
-				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+				dscm.deviceName = "WeMo Insight"
+				dscm.channelURI = channel.URI
+				dscm.deviceNewState = "on"
+				dscm.deviceOldState = "off"
+				
+				
+				
+				//UserTextMessage utm = new UserTextMessage()
+				//utm.text = "I turned on the light."
+				//utm.channelURI = channel.URI
+				
+				haleyAPI.sendMessage(haleySession, dscm) { HaleyStatus sendStatus ->
 					
 					println "send text message status: ${sendStatus}"
 					
@@ -352,11 +361,18 @@ static void onChannelObtained() {
 				HaleyWemoManager.turnOffDevice("WeMo Insight")
 				
 				
-				UserTextMessage utm = new UserTextMessage()
-				utm.text = "I turned off the light."
-				utm.channelURI = channel.URI
+				DeviceStateChangeMessage dscm = new DeviceStateChangeMessage().generateURI()
 				
-				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+				dscm.deviceName = "WeMo Insight"
+				dscm.channelURI = channel.URI
+				dscm.deviceNewState = "off"
+				dscm.deviceOldState = "on"
+				
+				//UserTextMessage utm = new UserTextMessage()
+				//utm.text = "I turned off the light."
+				//utm.channelURI = channel.URI
+				
+				haleyAPI.sendMessage(haleySession, dscm) { HaleyStatus sendStatus ->
 					
 					println "send text message status: ${sendStatus}"
 					

@@ -52,6 +52,8 @@ public class HaleyEmbeddedApp {
 	
 	static String password
 	
+	static VitalApp app
+	
 	
 	
 	
@@ -208,7 +210,10 @@ try {
 	println "wemoBinary:" + HaleyWemoManager.wemoBinary
 	
 	
-	VitalApp app = VitalApp.withId(appID)
+	app = VitalApp.withId(appID)
+	
+	
+	vs.setCurrentApp(app)
 	
 	VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(Vertx.vertx(), app, 'endpoint.', endpointURL)
 	

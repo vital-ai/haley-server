@@ -36,7 +36,6 @@ import com.vitalai.aimp.domain.Channel
 import com.vitalai.aimp.domain.UserTextMessage
 
 
-//import ai.haley.embedded.json.JSONUtils
 
 //import ai.vital.vitalsigns.model.xsd
 
@@ -54,7 +53,7 @@ public class HaleyEmbeddedApp {
 	
 	static VitalApp app
 	
-	
+	static String wemoDeviceName = "Outlet1" // "Wemo Insight"
 	
 	
 public static void main(String[] args) {
@@ -178,9 +177,6 @@ try {
 	 */
 	 
 	 
-	 
-	 
-	 
 	 /*
 	router.route().handler({ routingContext ->
 	  routingContext.response().putHeader("content-type", "text/html").end("Hello World!")
@@ -250,9 +246,9 @@ try {
 	
 	devices.each { println "Device: " + it }
 	
-	def stat = HaleyWemoManager.deviceStatus("WeMo Insight")
+	def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
 	
-	println "WeMo Insight Status: " + stat
+	println wemoDeviceName + " Status: " + stat
 	
 	
  
@@ -334,12 +330,12 @@ static void onChannelObtained() {
 			if(m.isaType(DeviceActivateMessage)) {
 				println "activating"
 				
-				HaleyWemoManager.turnOnDevice("WeMo Insight")
+				HaleyWemoManager.turnOnDevice(wemoDeviceName)
 				
 				
 				DeviceStateChangeMessage dscm = new DeviceStateChangeMessage().generateURI()
 				
-				dscm.deviceName = "WeMo Insight"
+				dscm.deviceName = wemoDeviceName
 				dscm.channelURI = channel.URI
 				dscm.deviceNewState = "on"
 				dscm.deviceOldState = "off"
@@ -363,12 +359,12 @@ static void onChannelObtained() {
 			
 				println "deactivating"
 				
-				HaleyWemoManager.turnOffDevice("WeMo Insight")
+				HaleyWemoManager.turnOffDevice(wemoDeviceName)
 				
 				
 				DeviceStateChangeMessage dscm = new DeviceStateChangeMessage().generateURI()
 				
-				dscm.deviceName = "WeMo Insight"
+				dscm.deviceName = wemoDeviceName
 				dscm.channelURI = channel.URI
 				dscm.deviceNewState = "off"
 				dscm.deviceOldState = "on"
@@ -392,7 +388,7 @@ static void onChannelObtained() {
 				println "status"
 				
 				
-				def stat = HaleyWemoManager.deviceStatus("Wemo Insight")
+				def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
 				
 				if(stat == "on") {
 					
@@ -454,7 +450,7 @@ static void onChannelObtained() {
 		if(message.equals("turn on the light")) {
 
 			/*
-			HaleyWemoManager.turnOnDevice("WeMo Insight")
+			HaleyWemoManager.turnOnDevice(wemoDeviceName)
 			
 			
 			UserTextMessage utm = new UserTextMessage()
@@ -474,7 +470,7 @@ static void onChannelObtained() {
 		if(message.equals("turn off the light")) {
 			
 			/*
-			HaleyWemoManager.turnOffDevice("WeMo Insight")
+			HaleyWemoManager.turnOffDevice(wemoDeviceName)
 			
 			
 			UserTextMessage utm = new UserTextMessage()
@@ -494,7 +490,7 @@ static void onChannelObtained() {
 		
 	
 			/*
-			def stat = HaleyWemoManager.deviceStatus("Wemo Insight")
+			def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
 			
 			if(stat == "on") {
 				
@@ -533,7 +529,7 @@ static void onChannelObtained() {
 		
 			
 			
-			def stat = HaleyWemoManager.deviceStatus("Wemo Insight")
+			def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
 			
 			if(stat == "on") {
 				

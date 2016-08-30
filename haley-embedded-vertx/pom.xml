@@ -54,19 +54,24 @@
 </dependency>
 -->
 
-<!--  
+ 
   <dependency>
    <groupId>ai.haley</groupId>
   <artifactId>haley-client-groovy</artifactId>
-  <version>3.2.1</version>
+  <version>0.0.1</version>
+  
+  <!--  
   <exclusions>
   	<exclusion>
   		<groupId>io.netty</groupId>
   		<artifactId>*</artifactId>
   	</exclusion>
   </exclusions>
-  </dependency>
   -->
+  
+  
+  </dependency>
+  
   <!--  
 	<dependency>
       <groupId>io.netty</groupId>
@@ -96,10 +101,11 @@
   
   -->
   
+  
   <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-web</artifactId>
-  <version>3.2.1</version>
+  <version>3.3.2</version>
   
   <!--  
   <exclusions>
@@ -117,13 +123,13 @@
   <dependency>
  <groupId>io.vertx</groupId>
  <artifactId>vertx-core</artifactId>
- <version>3.2.1</version>
+ <version>3.3.2</version>
 </dependency>
 
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-lang-groovy</artifactId>
-  <version>3.2.1</version>
+  <version>3.3.2</version>
 </dependency>
   
   

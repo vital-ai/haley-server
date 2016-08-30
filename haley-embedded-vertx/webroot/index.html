@@ -26,7 +26,7 @@ Hello World of Devices!<p>
 <script>
 
 var xhr = new XMLHttpRequest();
-xhr.open("GET", "http://localhost:8888/devices", false);
+xhr.open("GET", "//devices", false);
 xhr.send();
 
 console.log(xhr.status);
@@ -49,7 +49,7 @@ function handler() {
 function doTurnOnDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
-	var url = "http://localhost:8888/devices/Outlet1/on";
+	var url =  window.location.href + "/devices/Outlet1/on";
 	xmlhttp.open("POST", url, true);
 	
 	xmlhttp.onreadystatechange = handler
@@ -60,7 +60,7 @@ function doTurnOnDevice() {
 function doTurnOffDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
-	var url = "http://localhost:8888/devices/Outlet1/off";
+	var url = window.location.href + "/devices/Outlet1/off";
 	xmlhttp.open("POST", url, true);
 	
 	xmlhttp.onreadystatechange = handler

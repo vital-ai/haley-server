@@ -39,7 +39,7 @@ console.log(xhr.responseText);
 function doTurnOnDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
-	var url = "http://localhost:8888/devices/Wemo%20Insight/on";
+	var url = "http://localhost:8888/devices/Outlet1/on";
 	xmlhttp.open("POST", url, false);
 	 xmlhttp.send();
 };
@@ -47,7 +47,7 @@ function doTurnOnDevice() {
 function doTurnOffDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
-	var url = "http://localhost:8888/devices/Wemo%20Insight/off";
+	var url = "http://localhost:8888/devices/Outlet1/off";
 	xmlhttp.open("POST", url, false);
 	 xmlhttp.send();
 	

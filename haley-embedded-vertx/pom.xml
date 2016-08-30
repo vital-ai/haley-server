@@ -7,20 +7,15 @@
 
   <groupId>ai.haley</groupId>
   <artifactId>haley-embedded-app</artifactId>
-  <version>3.2.1</version>
+  <version>0.0.1</version>
 
   <properties>
     <!-- the main class -->
     <exec.mainClass>ai.haley.local.HaleyLocalServer</exec.mainClass>
-    
-    
- 
      
         <vital.version>0.2.304</vital.version>
         
-        <netty.version>4.1.4.Final</netty.version>
- 
-    
+        <vertx.version>3.3.2</vertx.version>
     
   </properties>
 
@@ -54,153 +49,19 @@
 </dependency>
 -->
 
-<!--  
   <dependency>
-   <groupId>ai.haley</groupId>
-  <artifactId>haley-client-groovy</artifactId>
-  <version>3.2.1</version>
-  <exclusions>
-  	<exclusion>
-  		<groupId>io.netty</groupId>
-  		<artifactId>*</artifactId>
-  	</exclusion>
-  </exclusions>
+	<groupId>ai.haley</groupId>
+  	<artifactId>haley-client-groovy</artifactId>
+  	<version>0.0.1</version>
   </dependency>
-  -->
-  <!--  
-	<dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-common</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-buffer</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-codec-http</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-  
-  -->
   
   <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-web</artifactId>
-  <version>3.2.1</version>
-  
-  <!--  
-  <exclusions>
-  	<exclusion>
-  		<groupId>io.netty</groupId>
-  		<artifactId>*</artifactId>
-  	</exclusion>
-  </exclusions>
-  
-  -->
+  <version>${vertx.version}</version>
   
 </dependency>
   
-  
-  <dependency>
- <groupId>io.vertx</groupId>
- <artifactId>vertx-core</artifactId>
- <version>3.2.1</version>
-</dependency>
-
-<dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-lang-groovy</artifactId>
-  <version>3.2.1</version>
-</dependency>
-  
-  
-  
-  
-  <!--  
-   <dependency>
-    <groupId>vital-ai</groupId>
-    <artifactId>vital-lucene</artifactId>
-    <version>${vital.version}</version>
-  </dependency>
-  
-  <dependency>
-    <groupId>vital-ai</groupId>
-    <artifactId>vital-sparql</artifactId>
-    <version>${vital.version}</version>
-  </dependency>
-  
-  <dependency>
-    <groupId>vital-ai</groupId>
-    <artifactId>vitalservice</artifactId>
-    <version>${vital.version}</version>
-        <exclusions>
-                <exclusion>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                </exclusion>
-        </exclusions>
-  </dependency>
-  
-  
-  <dependency>
-      <groupId>vital-ai</groupId>
-      <artifactId>vital-domain</artifactId>
-      <version>${vital.version}</version>
-      
-    </dependency>
-
-
- <dependency>
- <groupId>vital-ai</groupId>
- <artifactId>vital-aimp</artifactId>
- <version>0.1.0</version>
- <scope>provided</scope>
- </dependency>
-  
-  
-  -->
-  
-  
-  <dependency>
-    <groupId>com.typesafe</groupId>
-    <artifactId>config</artifactId>
-    <version>1.3.0</version>
-</dependency>
-  
- 
-  
- 
-
-    
-  <dependency>
-        <groupId>org.codehaus.groovy</groupId>
-        <artifactId>groovy-all</artifactId>
-        <version>2.5.0-SNAPSHOT</version>
-  </dependency>
-  
-  
-  
-  <dependency>
-        <groupId>com.thoughtworks.xstream</groupId>
-        <artifactId>xstream</artifactId>
-        <version>1.4.8</version>
-  </dependency>
-  
-  
- 
 
 <dependency>
     <groupId>org.usb4java</groupId>

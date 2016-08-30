@@ -1,12 +1,13 @@
 package ai.haley.embedded.wemo
 
+
 class HaleyWemoManager {
 
 	
 	public static String wemoBinary = "/anaconda/bin/wemo"
 	
 	
-	
+
 	public static List<String> listDevices() {
 		
 		def devices = []
@@ -22,6 +23,7 @@ class HaleyWemoManager {
 	
 	}
 	
+
 	public static boolean turnOnDevice(String name) {
 		
 		// check status first
@@ -43,6 +45,7 @@ class HaleyWemoManager {
 		
 	}
 	
+	
 	public static boolean turnOffDevice(String name) {
 		
 		// check status first
@@ -62,6 +65,7 @@ class HaleyWemoManager {
 		
 	}
 	
+
 	public static String deviceStatus(String name) {
 		
 		

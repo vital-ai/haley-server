@@ -4,36 +4,36 @@ package ai.haley.embedded
 import ai.haley.embedded.wemo.HaleyWemoManager
 
 
-import io.vertx.groovy.ext.web.handler.StaticHandler
+//import io.vertx.groovy.ext.web.handler.StaticHandler
 
 
-import io.vertx.core.DeploymentOptions
-import io.vertx.core.VertxOptions
+//import io.vertx.core.DeploymentOptions
+//import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpMethod
 
 
-import ai.vital.domain.*
+//import ai.vital.domain.*
 
-import com.vitalai.aimp.domain.*
+//import com.vitalai.aimp.domain.*
 
-import ai.vital.vitalsigns.model.property.URIProperty
+//import ai.vital.vitalsigns.model.property.URIProperty
 
 
 import io.vertx.groovy.ext.web.Router
 import io.vertx.groovy.core.Vertx
 
 
-import ai.haley.api.HaleyAPI
-import ai.haley.api.session.HaleySession
-import ai.haley.api.session.HaleyStatus
-import ai.haley.embedded.config.HaleyEmbeddedAppConfig
-import ai.vital.service.vertx3.websocket.VitalServiceAsyncWebsocketClient
-import ai.vital.vitalservice.query.ResultList
-import ai.vital.vitalsigns.VitalSigns
-import ai.vital.vitalsigns.model.VitalApp
-import com.vitalai.aimp.domain.AIMPMessage
-import com.vitalai.aimp.domain.Channel
-import com.vitalai.aimp.domain.UserTextMessage
+//import ai.haley.api.HaleyAPI
+//import ai.haley.api.session.HaleySession
+//import ai.haley.api.session.HaleyStatus
+//import ai.haley.embedded.config.HaleyEmbeddedAppConfig
+//import ai.vital.service.vertx3.websocket.VitalServiceAsyncWebsocketClient
+//import ai.vital.vitalservice.query.ResultList
+//import ai.vital.vitalsigns.VitalSigns
+//import ai.vital.vitalsigns.model.VitalApp
+//import com.vitalai.aimp.domain.AIMPMessage
+//import com.vitalai.aimp.domain.Channel
+//import com.vitalai.aimp.domain.UserTextMessage
 
 
 
@@ -41,17 +41,17 @@ import com.vitalai.aimp.domain.UserTextMessage
 
 public class HaleyEmbeddedApp {
 
-	static HaleyAPI haleyAPI
+	//static HaleyAPI haleyAPI
 	
-	static HaleySession haleySession
+	//static HaleySession haleySession
 	
-	static Channel channel
+	//static Channel channel
 	
 	static String username
 	
 	static String password
 	
-	static VitalApp app
+	//static VitalApp app
 	
 	static String wemoDeviceName = "Outlet1" // "Wemo Insight"
 	
@@ -65,7 +65,7 @@ try {
 	
 	// config file
 	
-	HaleyEmbeddedAppConfig.init()
+	//HaleyEmbeddedAppConfig.init()
 	
 	
 	// start http server, use for local UI and rest interface
@@ -92,18 +92,25 @@ try {
 	
 	//new DeploymentOptions().setWorker(true)
 	
-	 def router = Router.router( Vertx.vertx(
+	def vertx = Vertx.vertx()
+	
+	def server = vertx.createHttpServer()
+	
+	def router = Router.router(vertx)
+	
+	
+	 //def router = Router.router( Vertx.vertx(
 		// [ 
 		// maxEventLoopExecuteTime:60000,
 		// maxWorkerExecuteTime:60000,
 		// blockedThreadCheckPeriod:60000
 		// ]
-	 ) )
+	 //) )
 	
-	 
+	 /*
 	 def route = router.route(HttpMethod.POST, "/devices/:devicename/:deviceaction")
 	 
-	 route.handler({ routingContext ->
+	 route.blockingHandler({ routingContext ->
 	 
 	   def deviceName = routingContext.request().getParam("devicename")
 	   def deviceAction= routingContext.request().getParam("deviceaction")
@@ -137,31 +144,49 @@ try {
 	   
 	 })
 	 
+	 */
 	 
 	 def route_list = router.route(HttpMethod.GET, "/devices")
 	 
 	 route_list.handler({ routingContext ->
 	 
 	   
+		 println "listing devices"
 	   
-	   def devices = HaleyWemoManager.listDevices()
+	   //def devices = HaleyWemoManager.listDevices()
 	   
-	   def device_list = ""
+	   //def device_list = "('Switch:', 'WeMo Insight')"
 	   
-	   devices.each{ device_list += ( it + "\n") }
+	   //devices.each{ device_list += ( it + "\n") ; println "device: " + it}
 	   
+	   //device_list = "<html><body>" + device_list + "</body></html>"
 	   
+	  // routingContext.response().putHeader("content-type", "text/html")
 	   
-	   routingContext.response().putHeader("content-type", "text/html").end(device_list)
+	  // routingContext.response().setChunked(true)
+	   
+	  // routingContext.response().write(device_list)
+	   
+	   routingContext.response().putHeader("content-type", "text/html").end("Hello World.")
 	   
 	   
 	 })
 	 
 	 
+	 
 	 // add static handler 
 	 
 	 
-	 router.route().handler(StaticHandler.create())
+	 //def router2 = Router.router( Vertx.vertx(
+	 // [
+	 // maxEventLoopExecuteTime:60000,
+	 // maxWorkerExecuteTime:60000,
+	 // blockedThreadCheckPeriod:60000
+	 // ]
+ // ) )
+	 
+	 
+	 //router2.route().handler(StaticHandler.create())
 	 
 	 /*
 	 def route_home = router.route(HttpMethod.GET, "/")
@@ -183,9 +208,12 @@ try {
 	})
 	*/
 	 
-	Vertx.vertx().createHttpServer().requestHandler(router.&accept).listen(8888)
+	server.requestHandler(router.&accept).listen(8080)
+	
+	//Vertx.vertx().createHttpServer().requestHandler(router2.&accept).listen(8080)
 	
 	
+	/*
 	VitalSigns vs = VitalSigns.get()
 	
 	
@@ -210,6 +238,11 @@ try {
 	
 	
 	vs.setCurrentApp(app)
+	
+	*/
+	
+	
+	/*
 	
 	VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(Vertx.vertx(), app, 'endpoint.', endpointURL)
 	
@@ -242,6 +275,10 @@ try {
 		
 	}
 	
+	*/
+	
+	
+	/*
 	def devices = HaleyWemoManager.listDevices()
 	
 	devices.each { println "Device: " + it }
@@ -250,6 +287,7 @@ try {
 	
 	println wemoDeviceName + " Status: " + stat
 	
+	*/
 	
  
 } catch (InterruptedException ex) {
@@ -264,7 +302,7 @@ println("URISyntaxException exception: " + ex.getMessage())
 
 }
 
-
+/*
 static void onSessionReady() {
 	
 	haleyAPI.authenticateSession(haleySession, username, password) { HaleyStatus status ->
@@ -449,77 +487,20 @@ static void onChannelObtained() {
 		
 		if(message.equals("turn on the light")) {
 
-			/*
-			HaleyWemoManager.turnOnDevice(wemoDeviceName)
 			
-			
-			UserTextMessage utm = new UserTextMessage()
-			utm.text = "I turned on the light."
-			utm.channelURI = channel.URI
-			
-			haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
-				
-				println "send text message status: ${sendStatus}"
-				
-			}
-			*/
 			
 			
 		}
 		
 		if(message.equals("turn off the light")) {
 			
-			/*
-			HaleyWemoManager.turnOffDevice(wemoDeviceName)
 			
-			
-			UserTextMessage utm = new UserTextMessage()
-			utm.text = "I turned off the light."
-			utm.channelURI = channel.URI
-			
-			haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
-				
-				println "send text message status: ${sendStatus}"
-				
-			}
-			*/
 			
 		}
 		
 		if(message.equals("is the light on?")) {
 		
 	
-			/*
-			def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
-			
-			if(stat == "on") {
-				
-				UserTextMessage utm = new UserTextMessage()
-				utm.text = "Yes."
-				utm.channelURI = channel.URI
-				
-				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
-					
-					println "send text message status: ${sendStatus}"
-					
-				}
-				
-			
-				
-			}
-			else {
-				UserTextMessage utm = new UserTextMessage()
-				utm.text = "No."
-				utm.channelURI = channel.URI
-				
-				haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
-					
-					println "send text message status: ${sendStatus}"
-					
-				}
-				
-			}
-			*/
 			
 				
 	}
@@ -577,5 +558,6 @@ static void onChannelObtained() {
 	
 	
 }
+*/
 
 }

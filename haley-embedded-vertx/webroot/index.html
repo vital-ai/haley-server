@@ -22,6 +22,7 @@ Hello World of Devices!<p>
 
 </form>
 
+<!--  
 <script>
 
 var xhr = new XMLHttpRequest();
@@ -33,14 +34,26 @@ console.log(xhr.statusText);
 console.log(xhr.responseText);
 
 </script>
-
+-->
 
 <script>
+
+function handler() {
+	
+	console.log("done!");
+	
+	
+	
+}
+
 function doTurnOnDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
 	var url = "http://localhost:8888/devices/Outlet1/on";
-	xmlhttp.open("POST", url, false);
+	xmlhttp.open("POST", url, true);
+	
+	xmlhttp.onreadystatechange = handler
+	
 	 xmlhttp.send();
 };
 
@@ -48,7 +61,10 @@ function doTurnOffDevice() {
 	
 	xmlhttp = new XMLHttpRequest();
 	var url = "http://localhost:8888/devices/Outlet1/off";
-	xmlhttp.open("POST", url, false);
+	xmlhttp.open("POST", url, true);
+	
+	xmlhttp.onreadystatechange = handler
+	
 	 xmlhttp.send();
 	
 };

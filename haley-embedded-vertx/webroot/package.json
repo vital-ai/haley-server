@@ -1,0 +1,16 @@
+{
+  "name": "haley-embedded-app",
+  "version": "0.0.1",
+  "description": "haley embedded server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "“Marc <“marc@vital.ai”> (http://vital.ai)",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "bootstrap-switch": "^3.3.2",
+    "jquery": "^3.1.0"
+  }
+}

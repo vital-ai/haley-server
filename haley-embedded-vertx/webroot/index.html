@@ -2,6 +2,12 @@
 <head>
   <title></title>
   
+  
+<link href="scripts/css/bootstrap.css" rel="stylesheet">
+<link href="scripts/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+<script src="scripts/jquery.js"></script>
+<script src="scripts/js/bootstrap-switch.js"></script>
+  
 </head>
 
 <style>
@@ -10,9 +16,24 @@
 
 <body>
 
-Hello World of Devices!<p>
+Haley Internet of Things Control Panel<br>
+
+<div>
+<form>Wemo Outlet1: 
+<input type="checkbox" name="my-checkbox">
+</form>
+</div>
 
 
+<script>
+
+$.fn.bootstrapSwitch.defaults.size = 'large';
+$.fn.bootstrapSwitch.defaults.onColor = 'success';
+
+$("[name='my-checkbox']").bootstrapSwitch();
+
+</script>
+<!--  
 <form>
 
 <input id="turnOn" type="button" value="turnOn" onclick="doTurnOnDevice();" />
@@ -21,6 +42,13 @@ Hello World of Devices!<p>
 <input id="turnOff" type="button" value="turnOff" onclick="doTurnOffDevice();" />
 
 </form>
+
+-->
+
+<iframe src="https://haley-ai-web.vital.ai" style="position:absolute; bottom:0px; height:90%; width:100%;" frameborder="0"></iframe>
+
+
+
 
 <!--  
 <script>

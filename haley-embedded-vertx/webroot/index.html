@@ -18,6 +18,7 @@
 
 Haley Internet of Things Control Panel<br>
 
+
 <div>
 <form>Wemo Outlet1: 
 <input type="checkbox" name="my-checkbox">
@@ -27,10 +28,33 @@ Haley Internet of Things Control Panel<br>
 
 <script>
 
+// need to check status first to determine state of switch
+// for each device found, produce a switch, and autosize the control panel
+
+
 $.fn.bootstrapSwitch.defaults.size = 'large';
 $.fn.bootstrapSwitch.defaults.onColor = 'success';
 
 $("[name='my-checkbox']").bootstrapSwitch();
+
+$('input[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function(event, state) {
+	  console.log(this); // DOM element
+	  console.log(event); // jQuery event
+	  console.log(state); // true | false
+	  
+	  if(state == true) {
+		  
+		  doTurnOnDevice();
+	  }
+	  
+	  
+	  if(state == false) {
+		
+		  doTurnOffDevice();
+		  
+	  }
+	  
+	});
 
 </script>
 <!--  

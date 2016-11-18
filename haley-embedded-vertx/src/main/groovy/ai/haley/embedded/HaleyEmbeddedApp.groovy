@@ -26,6 +26,8 @@ import io.vertx.groovy.core.Vertx
 import ai.haley.api.HaleyAPI
 import ai.haley.api.session.HaleySession
 import ai.haley.api.session.HaleyStatus
+import ai.haley.embedded.HaleyEmbeddedApp.ConnectionFailedException
+import ai.haley.embedded.HaleyEmbeddedApp.ReconnectionFailedException;
 import ai.haley.embedded.config.HaleyEmbeddedAppConfig
 import ai.vital.service.vertx3.websocket.VitalServiceAsyncWebsocketClient
 import ai.vital.vitalservice.query.ResultList
@@ -244,12 +246,6 @@ try {
 	
 	vs.setCurrentApp(app)
 	
-	
-	
-	connectHaleyAPI(vertx)
-	
-	
-	
 	def devices = HaleyWemoManager.listDevices()
 	
 	devices.each { println "Device: " + it }
@@ -257,7 +253,18 @@ try {
 	def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
 	
 	println wemoDeviceName + " Status: " + stat
+
 	
+	while(true) {
+		
+		try {
+			
+			connectHaleyAPI(vertx)
+			
+		} catch(Exception e) {
+			log.error("Haley connection failed, resuming immedatiely", e)
+		}		
+	} 
 
 	
  
@@ -271,21 +278,49 @@ println("URISyntaxException exception: " + ex.getMessage())
 
 
 
+
 }
 
 
-static void connectHaleyAPI(Vertx vertx) {
+static class ConnectionFailedException extends Exception {
+
+	public ConnectionFailedException(Throwable arg0) {
+		super(arg0);
+	}
+		
+}
+
+static class ReconnectionFailedException extends Exception {
+	
+	int attempts = 0
+	
+	ReconnectionFailedException(int attempts) {
+		this.attempts = attempts
+	}
+	
+}
+
+/**
+ * throws exception when either the client couldn't connect to endpoint or websocket reconnection failed
+ * @param vertx
+ */
+static void connectHaleyAPI(Vertx vertx) throws ConnectionFailedException, ReconnectionFailedException {
 	
 	
 	VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(vertx, app, 'endpoint.', endpointURL, 10, 3000)
+	
+	
+	Object lock = new Object()
+	
+	Exception returnedException = null
 	
 	websocketClient.connect({ Throwable exception ->
 		
 		if(exception) {
 			log.error("Error when connecting to endpoint: ${endpointURL}", exception)
-			log.error("Waiting 3 seconds and reconnecting")
-			vertx.setTimer(3000) { long timerID ->
-				connectHaleyAPI(vertx)
+			returnedException = new ConnectionFailedException(exception)
+			synchronized(lock) {
+				lock.notifyAll()
 			}
 			return
 		}
@@ -311,11 +346,18 @@ static void connectHaleyAPI(Vertx vertx) {
 		}
 		
 	}, {Integer attempts ->
-		log.error("websocket reconnect failed ${attempts} time(s), waiting 10 seconds and starting over the client")
-		vertx.setTimer(3000) { long timerID ->
-			connectHaleyAPI(vertx)
+		log.error("websocket reconnect failed ${attempts} time(s)")
+		returnedException = new ReconnectionFailedException(attempts)
+		synchronized(lock) {
+			lock.notifyAll()
 		}
 	})
+	
+	synchronized (lock) {
+		lock.wait()
+	}
+	
+	if(returnedException != null) throw returnedException
 	
 	
 }

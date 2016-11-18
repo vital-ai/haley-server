@@ -11,8 +11,8 @@ import io.vertx.groovy.ext.web.handler.StaticHandler
 //import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpMethod
 
-
-//import ai.vital.domain.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory;
 
 import com.vitalai.aimp.domain.*
 
@@ -55,6 +55,9 @@ public class HaleyEmbeddedApp {
 	
 	static String wemoDeviceName = "Outlet1" // "Wemo Insight"
 	
+	static String endpointURL
+	
+	private final static Logger log = LoggerFactory.getLogger(HaleyEmbeddedApp.class)
 	
 public static void main(String[] args) {
 
@@ -219,7 +222,7 @@ try {
 	VitalSigns vs = VitalSigns.get()
 	
 	
-	String endpointURL = vs.getConfig("haleyEndpoint")
+	endpointURL = vs.getConfig("haleyEndpoint")
 	println "Endpoint: ${endpointURL}"
 	String appID =  vs.getConfig("haleyApp")
 	println "AppID: ${appID}"
@@ -243,41 +246,7 @@ try {
 	
 	
 	
-	
-	
-	
-	VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(Vertx.vertx(), app, 'endpoint.', endpointURL)
-	
-	websocketClient.connect() { Throwable exception ->
-		
-		if(exception) {
-			exception.printStackTrace()
-			return
-		}
-		
-		haleyAPI = new HaleyAPI(websocketClient)
-		
-		println "Sessions: " + haleyAPI.getSessions().size()
-		
-		haleyAPI.openSession() { String errorMessage,  HaleySession session ->
-			
-			haleySession = session
-			
-			if(errorMessage) {
-				throw new Exception(errorMessage)
-			}
-			
-			println "Session opened ${session.toString()}"
-			
-			println "Sessions: " + haleyAPI.getSessions().size()
-			
-			onSessionReady()
-			
-		}
-		
-	}
-	
-	
+	connectHaleyAPI(vertx)
 	
 	
 	
@@ -304,6 +273,52 @@ println("URISyntaxException exception: " + ex.getMessage())
 
 }
 
+
+static void connectHaleyAPI(Vertx vertx) {
+	
+	
+	VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(vertx, app, 'endpoint.', endpointURL, 10, 3000)
+	
+	websocketClient.connect({ Throwable exception ->
+		
+		if(exception) {
+			log.error("Error when connecting to endpoint: ${endpointURL}", exception)
+			log.error("Waiting 3 seconds and reconnecting")
+			vertx.setTimer(3000) { long timerID ->
+				connectHaleyAPI(vertx)
+			}
+			return
+		}
+		
+		haleyAPI = new HaleyAPI(websocketClient)
+		
+		println "Sessions: " + haleyAPI.getSessions().size()
+		
+		haleyAPI.openSession() { String errorMessage,  HaleySession session ->
+			
+			haleySession = session
+			
+			if(errorMessage) {
+				throw new Exception(errorMessage)
+			}
+			
+			println "Session opened ${session.toString()}"
+			
+			println "Sessions: " + haleyAPI.getSessions().size()
+			
+			onSessionReady()
+			
+		}
+		
+	}, {Integer attempts ->
+		log.error("websocket reconnect failed ${attempts} time(s), waiting 10 seconds and starting over the client")
+		vertx.setTimer(3000) { long timerID ->
+			connectHaleyAPI(vertx)
+		}
+	})
+	
+	
+}
 
 static void onSessionReady() {
 	

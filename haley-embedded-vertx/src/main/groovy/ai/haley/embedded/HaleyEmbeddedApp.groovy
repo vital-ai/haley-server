@@ -397,8 +397,8 @@ public class HaleyEmbeddedApp {
 				System.err.println("Channel not found: ${channelName}")
 				return
 			}
-
-			channel = channels[0]
+			
+			println "CHANNEL: ${channel}"
 
 			onChannelObtained()
 

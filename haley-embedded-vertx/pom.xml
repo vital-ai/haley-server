@@ -72,6 +72,13 @@
   
   </dependency>
   
+  
+  <dependency>
+    <groupId>vitalai-com</groupId>
+    <artifactId>haley</artifactId>
+    <version>0.1.0</version>
+  </dependency>
+    
   <!--  
 	<dependency>
       <groupId>io.netty</groupId>

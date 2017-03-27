@@ -11,6 +11,8 @@ import io.vertx.groovy.ext.web.handler.StaticHandler
 //import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpMethod
 
+import java.util.Set;
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +31,20 @@ import ai.haley.api.session.HaleyStatus
 import ai.haley.embedded.HaleyEmbeddedApp.ConnectionFailedException
 import ai.haley.embedded.HaleyEmbeddedApp.ReconnectionFailedException;
 import ai.haley.embedded.config.HaleyEmbeddedAppConfig
+import ai.vital.domain.Edge_hasUserLogin;
 import ai.vital.service.vertx3.websocket.VitalServiceAsyncWebsocketClient
 import ai.vital.vitalservice.query.ResultList
 import ai.vital.vitalsigns.VitalSigns
+import ai.vital.vitalsigns.model.GraphMatch
 import ai.vital.vitalsigns.model.VitalApp
+import ai.vital.vitalsigns.model.property.GeoLocationProperty
+import ai.vital.vitalsigns.model.property.URIProperty
 import com.vitalai.aimp.domain.AIMPMessage
 import com.vitalai.aimp.domain.Channel
 import com.vitalai.aimp.domain.UserTextMessage
+import com.vitalai.haley.domain.AssetConditionMessage
+import com.vitalai.haley.domain.AssetLocationMessage
+import com.vitalai.haley.domain.Edge_hasAccountAsset;
 
 
 
@@ -43,12 +52,17 @@ import com.vitalai.aimp.domain.UserTextMessage
 
 public class HaleyEmbeddedApp {
 
+	static final ALL_ASSETS = 'all'
+	
+	
 	static HaleyAPI haleyAPI
 
 	static HaleySession haleySession
 
 	static Channel channel
 
+	static Channel assetsChannel
+	
 	static String username
 
 	static String password
@@ -60,7 +74,20 @@ public class HaleyEmbeddedApp {
 	static String endpointURL
 
 	static String channelName = 'devices'
+	
+	
+	static Boolean assetsEnabled = null
+	
+	static String assetsChannelName = 'assets'
+	
+	static Integer assetsIntervalSeconds = null
+	
+	static String assetURI = ALL_ASSETS
 
+	static Set<String> assetURIs = new HashSet<String>()
+	
+	static Vertx vertx 
+	
 	private final static Logger log = LoggerFactory.getLogger(HaleyEmbeddedApp.class)
 
 	public static void main(String[] args) {
@@ -71,8 +98,36 @@ public class HaleyEmbeddedApp {
 		try {
 
 			// config file
+			
+			VitalSigns vs = VitalSigns.get()
+			
+			
+			endpointURL = vs.getConfig("haleyEndpoint")
+			println "Endpoint: ${endpointURL}"
+			String appID =  vs.getConfig("haleyApp")
+			println "AppID: ${appID}"
+			username =  vs.getConfig("haleyLogin")
+			println "Username: ${username}"
+			password =  vs.getConfig("haleyPassword")
+			println "Password length: ${password.length()}"
 
-			//HaleyEmbeddedAppConfig.init()
+			
+			Object assetsEnabledParam = vs.getConfig("assetsEnabled")
+			if(assetsEnabledParam == null) throw new Exception("No assetsEnabled boolean param")
+			if(!(assetsEnabledParam instanceof Boolean)) throw new Exception("assetsEnabled param must be a boolean")
+			
+			assetsEnabled = assetsEnabledParam
+			println "assetsEnabled: ${assetsEnabled}"
+			
+			
+			Object assetsIntervalSecondsParam = vs.getConfig("assetsIntervalSeconds")
+			if(assetsIntervalSecondsParam == null) throw new Exception("No assetsIntervalSeconds integer param")
+			if(!(assetsIntervalSecondsParam instanceof Number)) throw new Exception("assetsIntervalSeconds must be an integer")
+			
+			assetsIntervalSeconds = assetsIntervalSecondsParam.intValue()
+			println "assetsIntervalSeconds: ${assetsIntervalSeconds}"
+
+ 			//HaleyEmbeddedAppConfig.init()
 
 
 			// start http server, use for local UI and rest interface
@@ -99,7 +154,7 @@ public class HaleyEmbeddedApp {
 
 			//new DeploymentOptions().setWorker(true)
 
-			def vertx = Vertx.vertx()
+			vertx = Vertx.vertx()
 
 			def server = vertx.createHttpServer()
 
@@ -215,19 +270,6 @@ public class HaleyEmbeddedApp {
 
 			//Vertx.vertx().createHttpServer().requestHandler(router2.&accept).listen(8080)
 
-
-
-			VitalSigns vs = VitalSigns.get()
-
-
-			endpointURL = vs.getConfig("haleyEndpoint")
-			println "Endpoint: ${endpointURL}"
-			String appID =  vs.getConfig("haleyApp")
-			println "AppID: ${appID}"
-			username =  vs.getConfig("haleyLogin")
-			println "Username: ${username}"
-			password =  vs.getConfig("haleyPassword")
-			println "Password length: ${password.length()}"
 
 
 			String wemoBinary = vs.getConfig("wemoBinary")
@@ -388,8 +430,9 @@ public class HaleyEmbeddedApp {
 
 				if(ch.name == channelName) {
 					channel = ch
-					break
-				}
+				} else if(ch.name == assetsChannelName) {
+					assetsChannel = ch
+				}				
 
 			}
 
@@ -398,9 +441,28 @@ public class HaleyEmbeddedApp {
 				return
 			}
 			
+			
 			println "CHANNEL: ${channel}"
+			
+			if(assetsEnabled) {
+				
+				if(assetsChannel == null) {
+					System.err.println("Assets channel not found: ${assetsChannelName}")
+					return
+				}
+				
+				println "ASSETS CHANNEL: ${assetsChannel}"
+				
+				println "Querying for assets..."
+				
+				queryForAssets()
+				
+			} else {
+			
+				onChannelObtained()
+				
+			}
 
-			onChannelObtained()
 
 		}
 
@@ -658,7 +720,186 @@ public class HaleyEmbeddedApp {
 			println "join channel message status: ${sendStatus}"
 
 		}
+		
+		
+		if(assetsEnabled) {
+			
+			onAssetsListReady()
+			
+		}
+		
+		
+	}
+	
+	static void onAssetsListReady() {
+		
+		if(assetURIs.size() == 0) {
+			System.err.println "Assets list is empty"
+			return
+		}
+		
+		println "Assets list size: ${assetURIs.size()}"
+		
+		sendNextMessage()
+		
+		vertx.setPeriodic(assetsIntervalSeconds * 1000L) { Long timerID ->
+			
+			sendNextMessage()
+			
+		}
+		
+	}
+	
+	static sendNextMessage() {
+		
+		println "Sending assets messages..."
+		
+		for(String assetURI : assetURIs) {
+			
+			double minLat = 40.72046126415031;
+			double maxLat = 40.72176227543701;
+			double minLon = -74.00802612304688;
+			double maxLon = -73.98433685302734;
+			
+			double lat = minLat + ( Math.random() * (maxLat - minLat));
+			double lon = minLon + ( Math.random() * (maxLon - minLon));
+			
+			AssetLocationMessage locationMessage = new AssetLocationMessage()
+			locationMessage.timestamp = System.currentTimeMillis()
+			locationMessage.assetURI = assetURI
+			locationMessage.channelURI = assetsChannel.URI
+			locationMessage.location = new GeoLocationProperty(lon, lat)
+			
+			haleyAPI.sendMessage(haleySession, locationMessage) { HaleyStatus sendStatus ->
+				
+				println "location ${assetURI} message send status: ${sendStatus}"
+				
+			}
+			
+			AssetConditionMessage conditionMessage = new AssetConditionMessage()
+			conditionMessage.timestamp = System.currentTimeMillis()
+			conditionMessage.assetURI = assetURI
+			conditionMessage.channelURI = assetsChannel.URI
+			conditionMessage.humidity = 60f + (float) Math.round( 400 * Math.random()) / 10f
+			conditionMessage.temperature = 30f + (float)Math.round(300 * Math.random()) / 10f;
+			
+			haleyAPI.sendMessage(haleySession, conditionMessage) { HaleyStatus sendStatus ->
+				
+				println "condition ${assetURI} message send status: ${sendStatus}"
+				
+			}
+			
+		}
 
+	}
+			
+	
+	static void queryForAssets() {
+
+		String accountURI = null;
+		
+		MetaQLMessage queryMessage = new MetaQLMessage().generateURI((VitalApp) null)
+		queryMessage.channelURI = assetsChannel.URI
+
+		String uriFilter = '';
+		
+		if(assetURI != ALL_ASSETS) {
+				
+			uriFilter = """\
+node_constraint { "URI eq ${assetURI}" }
+"""
+		}
+			
+			
+		queryMessage.queryString =
+"""\
+GRAPH {
+
+	value segments: '*'
+	value offset: 0
+	value limit: 1000
+	value inlineObjects: false
+
+	ARC {
+
+		node_constraint { "URI eq ${haleySession.authAccount.URI}" }
+
+		ARC {
+
+			value direction: 'reverse'
+
+			edge_constraint { ${Edge_hasUserLogin.class.getCanonicalName()}.class }
+
+			ARC {
+
+				value direction: 'forward'
+
+				edge_constraint { ${Edge_hasAccountAsset.class.getCanonicalName()}.class }
+	
+				node_bind { "asset" }
+	
+				${uriFilter}
+			}
+
+		}
+	
+	}
+					
+}
+"""
+
+//		haleyAPI.registerRequestCallback(queryMessage) {
+//
+//		}
+		
+		haleyAPI.sendMessageWithRequestCallback(haleySession, queryMessage, [], { ResultList messageRL ->
+		
+			println "query results received"
+			
+			List<MetaQLResultsMessage> resMsgs = messageRL.iterator(MetaQLResultsMessage.class).toList()
+			if(resMsgs.size() == 0) {
+				System.err.println("No results message object")
+				return
+			}
+			MetaQLResultsMessage resMsg = resMsgs.get(0)
+			println "query status: " + resMsg.status
+			
+			for ( GraphMatch gm : messageRL.iterator(GraphMatch.class) ) {
+				
+				URIProperty _assetURI = gm.getProperty("asset");
+			
+				if(_assetURI != null) {
+					assetURIs.add(_assetURI.get())
+				}
+					
+			}
+			
+			if(assetURI != ALL_ASSETS) {
+
+				if(!assetURIs.contains(assetURI)) {
+					System.err.println("Asset not found: ${assetURI}")
+					return
+				}
+								
+			}
+			
+			if(assetURIs.size() == 0) {
+				System.err.println("No assets found: ${assetURI}")
+				return
+			}
+			
+			onChannelObtained()
+				
+		}) { HaleyStatus sendStatus ->
+			
+			println "query message send status: ${sendStatus}"
+			
+			if(!sendStatus.isOk()) {
+				return
+			}
+			
+		}
+				
 	}
 
 

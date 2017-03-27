@@ -449,7 +449,11 @@ public class HaleyEmbeddedApp {
 					dscm.channelURI = channel.URI
 					dscm.deviceNewState = "on"
 					dscm.deviceOldState = "off"
-
+					if(m.requestURI) {
+						dscm.requestURI = m.requestURI
+					} else {
+						dscm.requestURI = m.URI
+					}
 
 
 					//UserTextMessage utm = new UserTextMessage()
@@ -478,6 +482,12 @@ public class HaleyEmbeddedApp {
 					dscm.channelURI = channel.URI
 					dscm.deviceNewState = "off"
 					dscm.deviceOldState = "on"
+					
+					if(m.requestURI) {
+						dscm.requestURI = m.requestURI
+					} else {
+						dscm.requestURI = m.URI
+					}
 
 					//UserTextMessage utm = new UserTextMessage()
 					//utm.text = "I turned off the light."
@@ -495,10 +505,13 @@ public class HaleyEmbeddedApp {
 				}
 				if(m.isaType(DeviceStatusRequestMessage)) {
 
-					println "status"
 
+					println "status request"
 
 					def stat = HaleyWemoManager.deviceStatus(wemoDeviceName)
+					
+					println "state: " + stat
+					
 
 					//				if(stat == "on") {
 
@@ -506,6 +519,12 @@ public class HaleyEmbeddedApp {
 					dsm.deviceName = wemoDeviceName
 					dsm.deviceStatus = stat
 					dsm.channelURI = channel.URI
+					
+					if(m.requestURI) {
+						dsm.requestURI = m.requestURI
+					} else {
+						dsm.requestURI = m.URI
+					}
 
 					//					UserTextMessage utm = new UserTextMessage()
 					//					utm.text = "The light is on."

@@ -522,7 +522,7 @@ public class HaleyEmbeddedApp {
 					//utm.text = "I turned on the light."
 					//utm.channelURI = channel.URI
 
-					haleyAPI.sendMessage(haleySession, dscm) { HaleyStatus sendStatus ->
+					HaleyEmbeddedApp.sendMessage(dscm) { HaleyStatus sendStatus ->
 
 						println "send text message status: ${sendStatus}"
 
@@ -555,7 +555,7 @@ public class HaleyEmbeddedApp {
 					//utm.text = "I turned off the light."
 					//utm.channelURI = channel.URI
 
-					haleyAPI.sendMessage(haleySession, dscm) { HaleyStatus sendStatus ->
+					HaleyEmbeddedApp.sendMessage(dscm) { HaleyStatus sendStatus ->
 
 						println "send text message status: ${sendStatus}"
 
@@ -592,7 +592,7 @@ public class HaleyEmbeddedApp {
 					//					utm.text = "The light is on."
 					//					utm.channelURI = channel.URI
 
-					haleyAPI.sendMessage(haleySession, dsm) { HaleyStatus sendStatus ->
+					HaleyEmbeddedApp.sendMessage(dsm) { HaleyStatus sendStatus ->
 
 						println "send text message status: ${sendStatus}"
 
@@ -632,7 +632,7 @@ public class HaleyEmbeddedApp {
 					utm.text = "I found these devices: " + devices
 					utm.channelURI = channel.URI
 
-					haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+					HaleyEmbeddedApp.sendMessage(utm) { HaleyStatus sendStatus ->
 
 						println "send text message status: ${sendStatus}"
 
@@ -674,7 +674,7 @@ public class HaleyEmbeddedApp {
 						utm.text = "No."
 						utm.channelURI = channel.URI
 	
-						haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+						HaleyEmbeddedApp.sendMessage(utm) { HaleyStatus sendStatus ->
 	
 							println "send text message status: ${sendStatus}"
 	
@@ -687,7 +687,7 @@ public class HaleyEmbeddedApp {
 						utm.text = "Yes."
 						utm.channelURI = channel.URI
 	
-						haleyAPI.sendMessage(haleySession, utm) { HaleyStatus sendStatus ->
+						HaleyEmbeddedApp.sendMessage(utm) { HaleyStatus sendStatus ->
 	
 							println "send text message status: ${sendStatus}"
 	
@@ -715,19 +715,18 @@ public class HaleyEmbeddedApp {
 		JoinChannel joinChannelMessage = new JoinChannel()
 		joinChannelMessage.channelURI = channel.URI
 
-		haleyAPI.sendMessage(haleySession, joinChannelMessage) { HaleyStatus sendStatus ->
+		sendMessage(joinChannelMessage) { HaleyStatus sendStatus ->
 
 			println "join channel message status: ${sendStatus}"
 
-		}
-		
-		
-		if(assetsEnabled) {
 			
-			onAssetsListReady()
+			if(assetsEnabled) {
+				
+				onAssetsListReady()
+				
+			}
 			
 		}
-		
 		
 	}
 	
@@ -770,7 +769,9 @@ public class HaleyEmbeddedApp {
 			locationMessage.channelURI = assetsChannel.URI
 			locationMessage.location = new GeoLocationProperty(lon, lat)
 			
-			haleyAPI.sendMessage(haleySession, locationMessage) { HaleyStatus sendStatus ->
+			
+			
+			sendMessage(locationMessage) { HaleyStatus sendStatus ->
 				
 				println "location ${assetURI} message send status: ${sendStatus}"
 				
@@ -783,7 +784,7 @@ public class HaleyEmbeddedApp {
 			conditionMessage.humidity = 60f + (float) Math.round( 400 * Math.random()) / 10f
 			conditionMessage.temperature = 30f + (float)Math.round(300 * Math.random()) / 10f;
 			
-			haleyAPI.sendMessage(haleySession, conditionMessage) { HaleyStatus sendStatus ->
+			sendMessage(conditionMessage) { HaleyStatus sendStatus ->
 				
 				println "condition ${assetURI} message send status: ${sendStatus}"
 				
@@ -791,6 +792,16 @@ public class HaleyEmbeddedApp {
 			
 		}
 
+	}
+	
+	static void sendMessage(AIMPMessage msg, Closure sendStatusClosure) {
+		
+		synchronized(HaleyEmbeddedApp.class) {
+			
+			haleyAPI.sendMessage(haleySession, msg, sendStatusClosure)
+			
+		}
+		
 	}
 			
 	

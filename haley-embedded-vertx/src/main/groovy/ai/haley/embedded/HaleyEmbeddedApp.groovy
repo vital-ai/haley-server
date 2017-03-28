@@ -42,9 +42,9 @@ import ai.vital.vitalsigns.model.property.URIProperty
 import com.vitalai.aimp.domain.AIMPMessage
 import com.vitalai.aimp.domain.Channel
 import com.vitalai.aimp.domain.UserTextMessage
-import com.vitalai.haley.domain.AssetConditionMessage
-import com.vitalai.haley.domain.AssetLocationMessage
-import com.vitalai.haley.domain.Edge_hasAccountAsset;
+import com.vitalai.aimp.domain.AssetConditionMessage
+import com.vitalai.aimp.domain.AssetLocationMessage
+import com.vitalai.aimp.domain.Edge_hasAssetNode
 
 
 
@@ -834,7 +834,7 @@ GRAPH {
 
 				value direction: 'forward'
 
-				edge_constraint { ${Edge_hasAccountAsset.class.getCanonicalName()}.class }
+				edge_constraint { ${Edge_hasAssetNode.class.getCanonicalName()}.class }
 	
 				node_bind { "asset" }
 	

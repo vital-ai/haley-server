@@ -511,6 +511,7 @@ public class HaleyEmbeddedApp {
 					dscm.channelURI = channel.URI
 					dscm.deviceNewState = "on"
 					dscm.deviceOldState = "off"
+					dscm.channelsHistory = m.channelsHistory
 					if(m.requestURI) {
 						dscm.requestURI = m.requestURI
 					} else {
@@ -544,7 +545,7 @@ public class HaleyEmbeddedApp {
 					dscm.channelURI = channel.URI
 					dscm.deviceNewState = "off"
 					dscm.deviceOldState = "on"
-					
+					dscm.channelsHistory = m.channelsHistory
 					if(m.requestURI) {
 						dscm.requestURI = m.requestURI
 					} else {
@@ -581,7 +582,7 @@ public class HaleyEmbeddedApp {
 					dsm.deviceName = wemoDeviceName
 					dsm.deviceStatus = stat
 					dsm.channelURI = channel.URI
-					
+					dsm.channelsHistory = m.channelsHistory
 					if(m.requestURI) {
 						dsm.requestURI = m.requestURI
 					} else {

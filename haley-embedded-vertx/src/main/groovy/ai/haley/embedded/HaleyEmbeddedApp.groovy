@@ -345,7 +345,7 @@ public class HaleyEmbeddedApp {
 	static void connectHaleyAPI(Vertx vertx) throws ConnectionFailedException, ReconnectionFailedException {
 
 
-		VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(vertx, app, 'endpoint.', endpointURL, 10, 3000)
+		VitalServiceAsyncWebsocketClient websocketClient = new VitalServiceAsyncWebsocketClient(vertx, app, 'endpoint.', endpointURL, 1000, 5000)
 
 
 		Object lock = new Object()
@@ -365,6 +365,23 @@ public class HaleyEmbeddedApp {
 
 			haleyAPI = new HaleyAPI(websocketClient)
 
+			haleyAPI.addReconnectListener({HaleySession session ->
+				
+				log.info("websocket client reconnected, sending join channel message")
+					
+				if(channel == null) {
+					log.warn("No devices channel, cannot proceed")
+					return
+				}
+				
+				HaleyEmbeddedApp.sendMessage(new JoinChannel(channelURI: channel.URI)) { HaleyStatus sendStatus ->
+						
+					log.info("Send join channel message status: ${sendStatus}")
+						
+				}
+						
+			})
+			
 			println "Sessions: " + haleyAPI.getSessions().size()
 
 			haleyAPI.openSession() { String errorMessage,  HaleySession session ->

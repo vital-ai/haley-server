@@ -4,6 +4,7 @@ package ai.haley.embedded
 import ai.haley.embedded.wemo.HaleyWemoManager
 
 
+import groovy.json.JsonSlurper
 import io.vertx.groovy.ext.web.handler.StaticHandler
 
 
@@ -36,6 +37,7 @@ import ai.vital.service.vertx3.websocket.VitalServiceAsyncWebsocketClient
 import ai.vital.vitalservice.query.ResultList
 import ai.vital.vitalsigns.VitalSigns
 import ai.vital.vitalsigns.model.GraphMatch
+import ai.vital.vitalsigns.model.VITAL_GraphContainerObject
 import ai.vital.vitalsigns.model.VitalApp
 import ai.vital.vitalsigns.model.property.GeoLocationProperty
 import ai.vital.vitalsigns.model.property.URIProperty
@@ -63,6 +65,8 @@ public class HaleyEmbeddedApp {
 
 	static Channel assetsChannel
 	
+	static Channel uiChannel
+	
 	static String username
 
 	static String password
@@ -75,8 +79,15 @@ public class HaleyEmbeddedApp {
 
 	static String channelName = 'devices'
 	
+	static String uiChannelName = 'ui'
 	
 	static Boolean assetsEnabled = null
+	
+	static Boolean verifyAssets = false
+	
+	static Boolean sendAssetConditionMessage = true
+	
+	static Boolean sendAssetLocationMessage = false
 	
 	static String assetsChannelName = 'assets'
 	
@@ -87,6 +98,10 @@ public class HaleyEmbeddedApp {
 	static Set<String> assetURIs = new HashSet<String>()
 	
 	static Vertx vertx 
+	
+	
+	
+	static Boolean wakeUpWordEnabled = null
 	
 	private final static Logger log = LoggerFactory.getLogger(HaleyEmbeddedApp.class)
 
@@ -119,6 +134,15 @@ public class HaleyEmbeddedApp {
 			assetsEnabled = assetsEnabledParam
 			println "assetsEnabled: ${assetsEnabled}"
 			
+			Object assetURIParam = vs.getConfig("assetURI")
+			if(assetURIParam != null) {
+				if(!(assetURIParam instanceof String)) throw new Exception("assetURI param must be a string")
+				assetURI = assetURIParam
+				println "assetURI: ${assetURI}"
+			} else {
+				println "assetURI: ${assetURI} (default)"
+			}
+			
 			
 			Object assetsIntervalSecondsParam = vs.getConfig("assetsIntervalSeconds")
 			if(assetsIntervalSecondsParam == null) throw new Exception("No assetsIntervalSeconds integer param")
@@ -127,6 +151,11 @@ public class HaleyEmbeddedApp {
 			assetsIntervalSeconds = assetsIntervalSecondsParam.intValue()
 			println "assetsIntervalSeconds: ${assetsIntervalSeconds}"
 
+			
+			
+//			Object wakeUpWordEnabledParam = vs.getConfig("wakeUpWordEnabled");
+//			if(wakeUpWordEnabledParam == null) throw new Exception("No wakeUpWordEnabled boolean param")
+//			if(!(wakeUpWordEnabledParam instanceof Boolean)) throw new Exception("wakeUpWordEnabled must be a boolean")
  			//HaleyEmbeddedAppConfig.init()
 
 
@@ -447,8 +476,14 @@ public class HaleyEmbeddedApp {
 
 				if(ch.name == channelName) {
 					channel = ch
-				} else if(ch.name == assetsChannelName) {
+				}
+				
+				if(ch.name == assetsChannelName) {
 					assetsChannel = ch
+				}
+				
+				if(ch.name.toString() == uiChannelName) {
+					uiChannel = ch
 				}				
 
 			}
@@ -457,7 +492,6 @@ public class HaleyEmbeddedApp {
 				System.err.println("Channel not found: ${channelName}")
 				return
 			}
-			
 			
 			println "CHANNEL: ${channel}"
 			
@@ -773,40 +807,126 @@ public class HaleyEmbeddedApp {
 		
 		for(String assetURI : assetURIs) {
 			
-			double minLat = 40.72046126415031;
-			double maxLat = 40.72176227543701;
-			double minLon = -74.00802612304688;
-			double maxLon = -73.98433685302734;
-			
-			double lat = minLat + ( Math.random() * (maxLat - minLat));
-			double lon = minLon + ( Math.random() * (maxLon - minLon));
-			
-			AssetLocationMessage locationMessage = new AssetLocationMessage()
-			locationMessage.timestamp = System.currentTimeMillis()
-			locationMessage.assetURI = assetURI
-			locationMessage.channelURI = assetsChannel.URI
-			locationMessage.location = new GeoLocationProperty(lon, lat)
 			
 			
-			
-			sendMessage(locationMessage) { HaleyStatus sendStatus ->
+			if(sendAssetLocationMessage.booleanValue()) {
 				
-				println "location ${assetURI} message send status: ${sendStatus}"
+				double minLat = 40.72046126415031;
+				double maxLat = 40.72176227543701;
+				double minLon = -74.00802612304688;
+				double maxLon = -73.98433685302734;
 				
-			}
-			
-			AssetConditionMessage conditionMessage = new AssetConditionMessage()
-			conditionMessage.timestamp = System.currentTimeMillis()
-			conditionMessage.assetURI = assetURI
-			conditionMessage.channelURI = assetsChannel.URI
-			conditionMessage.humidity = 60f + (float) Math.round( 400 * Math.random()) / 10f
-			conditionMessage.temperature = 30f + (float)Math.round(300 * Math.random()) / 10f;
-			
-			sendMessage(conditionMessage) { HaleyStatus sendStatus ->
+				double lat = minLat + ( Math.random() * (maxLat - minLat));
+				double lon = minLon + ( Math.random() * (maxLon - minLon));
 				
-				println "condition ${assetURI} message send status: ${sendStatus}"
+				AssetLocationMessage locationMessage = new AssetLocationMessage()
+				locationMessage.timestamp = System.currentTimeMillis()
+				locationMessage.assetURI = assetURI
+				locationMessage.channelURI = assetsChannel.URI
+				locationMessage.location = new GeoLocationProperty(lon, lat)
+				
+				
+				
+				sendMessage(locationMessage) { HaleyStatus sendStatus ->
+					
+					println "location ${assetURI} message send status: ${sendStatus}"
+					
+				}
 				
 			}
+			
+			if(sendAssetConditionMessage?.booleanValue()) {
+				
+				//first obtain the weather condition
+				
+				def onTemperatureHumidityReady = { Float temperature, Float humidity ->
+					
+					AssetConditionMessage conditionMessage = new AssetConditionMessage()
+					conditionMessage.timestamp = System.currentTimeMillis()
+					conditionMessage.assetURI = assetURI
+					conditionMessage.channelURI = assetsChannel.URI
+					conditionMessage.humidity = humidity
+					conditionMessage.temperature = temperature
+					
+					sendMessage(conditionMessage) { HaleyStatus sendStatus ->
+						
+						println "condition ${assetURI} message send status: ${sendStatus}"
+						
+					}
+					
+					
+				}
+
+				if(uiChannel != null) {
+					
+					IntentMessage intentMessage = new IntentMessage()
+					intentMessage.generateURI()
+					intentMessage.channelURI = uiChannel.URI
+					intentMessage.intent = 'weather'
+					
+					haleyAPI.sendMessageWithRequestCallback(haleySession, intentMessage, [], { ResultList messageRL ->
+						
+							println "query results received"
+
+							AIMPMessage res = messageRL.first()
+							
+							if(!(res instanceof MetaQLResultsMessage)) {
+								println("Still waiting for weather results, got " + res.getClass())
+								//keep waiting
+								return true
+							} 
+														
+							MetaQLResultsMessage resMsg = res
+							String status = resMsg.status
+							println "weather status: " + status
+							if(status != 'ok') {
+								System.err.println("Error: " + resMsg.statusMessage)
+								return false
+							}
+							
+							List<VITAL_GraphContainerObject> containers = messageRL.iterator(VITAL_GraphContainerObject.class).toList()
+							
+							if(containers.size() != 1) {
+								System.err.println("Error - no weather container object")
+								return false
+							}
+							
+							String jsonData = containers.get(0).jsonData
+							
+							Map weatherObj = new JsonSlurper().parseText(jsonData)
+
+							Map currently = weatherObj.currently
+							
+							float t = currently.temperature
+							
+							float h = 100f * currently.humidity
+														
+							println "Current NYC temp ${t} humidity ${h}"
+							
+							onTemperatureHumidityReady(t, h)							
+								
+						}) { HaleyStatus sendStatus ->
+							
+							println "weather intent message send status: ${sendStatus}"
+							
+							if(!sendStatus.isOk()) {
+								return
+							}
+							
+						}
+					
+				} else {
+				
+					float t = 30f + (float)Math.round(300 * Math.random()) / 10f;
+					float h = 60f + (float) Math.round( 400 * Math.random()) / 10f
+					println "Using random temp ${t} humidity ${h} values"
+					onTemperatureHumidityReady(t, h)
+				
+				}			
+				
+				
+			}
+
 			
 		}
 
@@ -825,6 +945,13 @@ public class HaleyEmbeddedApp {
 	
 	static void queryForAssets() {
 
+		if( ! verifyAssets.booleanValue() ) {
+			println "Assets verification skipped - using single asset URI ${assetURI}"
+			assetURIs.add(assetURI)
+			onChannelObtained()
+			return
+		}
+		
 		String accountURI = null;
 		
 		MetaQLMessage queryMessage = new MetaQLMessage().generateURI((VitalApp) null)

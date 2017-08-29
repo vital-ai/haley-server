@@ -1,0 +1,12 @@
+[Unit]
+Description=HaleyEmbeddedApp
+After=network.target
+
+[Service]
+User=centos
+Group=centos
+ExecStart=/home/centos/haley-embedded-app.sh
+Restart=always
+
+[Install]
+WantedBy=default.target

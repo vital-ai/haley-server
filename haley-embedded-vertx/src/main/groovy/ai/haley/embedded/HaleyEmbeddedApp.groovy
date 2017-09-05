@@ -1,6 +1,7 @@
 package ai.haley.embedded
 
 
+import ai.haley.embedded.webserver.StatusHandler
 import ai.haley.embedded.wemo.HaleyWemoManager
 
 
@@ -100,6 +101,8 @@ public class HaleyEmbeddedApp {
 	static Vertx vertx 
 	
 	
+	static Long lastAssetMessageTimestamp = null
+	
 	
 	static Boolean wakeUpWordEnabled = null
 	
@@ -151,6 +154,7 @@ public class HaleyEmbeddedApp {
 			assetsIntervalSeconds = assetsIntervalSecondsParam.intValue()
 			println "assetsIntervalSeconds: ${assetsIntervalSeconds}"
 
+			lastAssetMessageTimestamp = System.currentTimeMillis()
 			
 			
 //			Object wakeUpWordEnabledParam = vs.getConfig("wakeUpWordEnabled");
@@ -182,10 +186,19 @@ public class HaleyEmbeddedApp {
 
 
 			//new DeploymentOptions().setWorker(true)
-
+			Map haleyEmbeddedWebserverCfg = vs.getConfig("haleyEmbeddedWebserver")
+			
+			if(haleyEmbeddedWebserverCfg == null) {
+				throw new Exception("No haleyEmbeddedWebserver vitalsigns config object")
+			}
+			
+			println "haleyEmbeddedWebserver config: ${haleyEmbeddedWebserverCfg}"
+			
+			//config is just passed
+			
 			vertx = Vertx.vertx()
 
-			def server = vertx.createHttpServer()
+			def server = vertx.createHttpServer(haleyEmbeddedWebserverCfg)
 
 			def router = Router.router(vertx)
 
@@ -263,7 +276,7 @@ public class HaleyEmbeddedApp {
 
 			})
 
-
+			router.get('/status').handler(new StatusHandler())
 
 			// add static handler
 
@@ -295,7 +308,7 @@ public class HaleyEmbeddedApp {
 			 })
 			 */
 
-			server.requestHandler(router.&accept).listen(8888)
+			server.requestHandler(router.&accept).listen()
 
 			//Vertx.vertx().createHttpServer().requestHandler(router2.&accept).listen(8080)
 
@@ -850,6 +863,10 @@ public class HaleyEmbeddedApp {
 					
 					sendMessage(conditionMessage) { HaleyStatus sendStatus ->
 						
+						if(sendStatus.isOk()) {
+							lastAssetMessageTimestamp = System.currentTimeMillis()
+						}
+						
 						println "condition ${assetURI} message send status: ${sendStatus}"
 						
 					}
@@ -908,6 +925,10 @@ public class HaleyEmbeddedApp {
 						}) { HaleyStatus sendStatus ->
 							
 							println "weather intent message send status: ${sendStatus}"
+							
+							if(sendStatus.isOk()) {
+								lastAssetMessageTimestamp = System.currentTimeMillis()
+							}
 							
 							if(!sendStatus.isOk()) {
 								return

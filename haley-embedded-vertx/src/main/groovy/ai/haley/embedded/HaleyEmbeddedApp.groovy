@@ -66,7 +66,7 @@ public class HaleyEmbeddedApp {
 
 	static Channel assetsChannel
 	
-	static Channel uiChannel
+	static Channel loginChannel
 	
 	static String username
 
@@ -79,8 +79,6 @@ public class HaleyEmbeddedApp {
 	static String endpointURL
 
 	static String channelName = 'devices'
-	
-	static String uiChannelName = 'ui'
 	
 	static Boolean assetsEnabled = null
 	
@@ -103,6 +101,7 @@ public class HaleyEmbeddedApp {
 	
 	static Long lastAssetMessageTimestamp = null
 	
+	static Long lastAssetReceivedTimestamp = null
 	
 	static Boolean wakeUpWordEnabled = null
 	
@@ -155,7 +154,7 @@ public class HaleyEmbeddedApp {
 			println "assetsIntervalSeconds: ${assetsIntervalSeconds}"
 
 			lastAssetMessageTimestamp = System.currentTimeMillis()
-			
+			lastAssetReceivedTimestamp = System.currentTimeMillis()
 			
 //			Object wakeUpWordEnabledParam = vs.getConfig("wakeUpWordEnabled");
 //			if(wakeUpWordEnabledParam == null) throw new Exception("No wakeUpWordEnabled boolean param")
@@ -495,8 +494,8 @@ public class HaleyEmbeddedApp {
 					assetsChannel = ch
 				}
 				
-				if(ch.name.toString() == uiChannelName) {
-					uiChannel = ch
+				if(ch.name.toString() == username) {
+					loginChannel = ch
 				}				
 
 			}
@@ -505,6 +504,12 @@ public class HaleyEmbeddedApp {
 				System.err.println("Channel not found: ${channelName}")
 				return
 			}
+			
+			if(loginChannel == null) {
+				System.err.println("Login channel not found: ${username}")
+				return
+			}
+			
 			
 			println "CHANNEL: ${channel}"
 			
@@ -854,6 +859,8 @@ public class HaleyEmbeddedApp {
 				
 				def onTemperatureHumidityReady = { Float temperature, Float humidity ->
 					
+					lastAssetReceivedTimestamp = System.currentTimeMillis()
+					
 					AssetConditionMessage conditionMessage = new AssetConditionMessage()
 					conditionMessage.timestamp = System.currentTimeMillis()
 					conditionMessage.assetURI = assetURI
@@ -863,22 +870,22 @@ public class HaleyEmbeddedApp {
 					
 					sendMessage(conditionMessage) { HaleyStatus sendStatus ->
 						
+						println "condition ${assetURI} message send status: ${sendStatus}"
+						
 						if(sendStatus.isOk()) {
 							lastAssetMessageTimestamp = System.currentTimeMillis()
 						}
-						
-						println "condition ${assetURI} message send status: ${sendStatus}"
 						
 					}
 					
 					
 				}
 
-				if(uiChannel != null) {
+				if(loginChannel != null) {
 					
 					IntentMessage intentMessage = new IntentMessage()
 					intentMessage.generateURI()
-					intentMessage.channelURI = uiChannel.URI
+					intentMessage.channelURI = loginChannel.URI
 					intentMessage.intent = 'weather'
 					
 					haleyAPI.sendMessageWithRequestCallback(haleySession, intentMessage, [], { ResultList messageRL ->
@@ -900,7 +907,7 @@ public class HaleyEmbeddedApp {
 								System.err.println("Error: " + resMsg.statusMessage)
 								return false
 							}
-							
+						
 							List<VITAL_GraphContainerObject> containers = messageRL.iterator(VITAL_GraphContainerObject.class).toList()
 							
 							if(containers.size() != 1) {
@@ -925,10 +932,6 @@ public class HaleyEmbeddedApp {
 						}) { HaleyStatus sendStatus ->
 							
 							println "weather intent message send status: ${sendStatus}"
-							
-							if(sendStatus.isOk()) {
-								lastAssetMessageTimestamp = System.currentTimeMillis()
-							}
 							
 							if(!sendStatus.isOk()) {
 								return

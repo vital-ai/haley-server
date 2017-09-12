@@ -82,7 +82,7 @@ public class HaleyEmbeddedApp {
 	
 	static Boolean assetsEnabled = null
 	
-	static Boolean verifyAssets = false
+	static Boolean verifyAssets = true
 	
 	static Boolean sendAssetConditionMessage = true
 	
@@ -968,7 +968,68 @@ public class HaleyEmbeddedApp {
 			
 	
 	static void queryForAssets() {
+		
+		if( ! verifyAssets.booleanValue() ) {
+			println "Assets verification skipped - using single asset URI ${assetURI}"
+			assetURIs.add(assetURI)
+			onChannelObtained()
+			return
+		}
 
+
+		
+		IntentMessage intent = new IntentMessage().generateURI((VitalApp) null)
+		intent.intent = 'details'
+		intent.propertyValue = 'device ' + assetURI
+		intent.channelURI = loginChannel.URI
+		
+		haleyAPI.sendMessageWithRequestCallback(haleySession, intent, [], { ResultList messageRL ->
+			
+				println "query results received"
+				
+				AIMPMessage msg = messageRL.first()
+				
+				if(!(msg instanceof MetaQLResultsMessage)) {
+					println("Received non metaql results message " + msg.getClass() + " - still waiting for response");
+					return true
+				}
+				
+				MetaQLResultsMessage resMsg = msg
+				println "device details status: " + resMsg.status
+				
+				if(resMsg.status?.toString() != 'ok') {
+					System.err.println("Error when querying for device: " + resMsg.statusMessage)
+					return false;
+				}
+				
+				
+				List<Entity> entities = messageRL.iterator(Entity.class).toList()
+				if(entities.size() != 1) {
+					System.err.println("Received more than 1 device entity")
+					return false
+				}
+				
+				Entity deviceEntity = entities.get(0)
+				
+				println "Device Entity: ${deviceEntity.name}"
+				
+				assetURIs.add(assetURI)
+				
+				onChannelObtained()
+
+				return false
+									
+			}) { HaleyStatus sendStatus ->
+				
+				println "query message send status: ${sendStatus}"
+				
+				if(!sendStatus.isOk()) {
+					return
+				}
+				
+			}
+		
+		/*
 		if( ! verifyAssets.booleanValue() ) {
 			println "Assets verification skipped - using single asset URI ${assetURI}"
 			assetURIs.add(assetURI)
@@ -1028,10 +1089,6 @@ GRAPH {
 }
 """
 
-//		haleyAPI.registerRequestCallback(queryMessage) {
-//
-//		}
-		
 		haleyAPI.sendMessageWithRequestCallback(haleySession, queryMessage, [], { ResultList messageRL ->
 		
 			println "query results received"
@@ -1079,6 +1136,7 @@ GRAPH {
 			}
 			
 		}
+		*/
 				
 	}
 

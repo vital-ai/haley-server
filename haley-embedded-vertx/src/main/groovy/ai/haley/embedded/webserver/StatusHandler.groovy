@@ -18,20 +18,30 @@ class StatusHandler implements Handler<RoutingContext> {
 		
 		if(HaleyEmbeddedApp.sendAssetConditionMessage || HaleyEmbeddedApp.sendAssetLocationMessage) {
 			
-			Long ts = HaleyEmbeddedApp.lastAssetMessageTimestamp
-			if(ts == null) ts = 0
 			int interval = HaleyEmbeddedApp.assetsIntervalSeconds
 			int margin = 2 * interval
+			
+			Long ts = HaleyEmbeddedApp.lastAssetMessageTimestamp
+			if(ts == null) ts = 0
 			
 			int ago = (int) ( ( System.currentTimeMillis() - ts ) / 1000L ) 
 			
 			if(ago > margin) {
 				r.ok = false
+				r.message = "Last temp/location message was sent ${ago} seconds ago, interval ${interval}"
 			}
+
+			ts = HaleyEmbeddedApp.lastAssetReceivedTimestamp
+			if(ts == null) ts = 0
+			ago = (int) ( ( System.currentTimeMillis() - ts ) / 1000L )
 			
-			r.message = "Last temp/location message was sent ${ago} seconds, interval ${interval}"
-			
+			if(ago > margin) {
+				r.ok = false
+				r.message = "Last temp/location message data was received ${ago} seconds ago, interval ${interval}"
+			} 
+						
 		} 
+		
 		
 		ctx.response().end(JsonOutput.toJson(r), 'UTF-8')
 		

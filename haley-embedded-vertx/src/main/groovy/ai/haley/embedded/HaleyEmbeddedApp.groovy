@@ -924,7 +924,8 @@ public class HaleyEmbeddedApp {
 							//float t = currently.temperature
 							
 							//float h = 100f * currently.humidity
-							
+
+														
 							float t = HaleyTempHumiditySensorManager.getTemp()
 							float h = HaleyTempHumiditySensorManager.getHumidity()		
 										

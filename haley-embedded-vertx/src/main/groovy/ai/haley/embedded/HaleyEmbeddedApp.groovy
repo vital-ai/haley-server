@@ -3,7 +3,7 @@ package ai.haley.embedded
 
 import ai.haley.embedded.webserver.StatusHandler
 import ai.haley.embedded.wemo.HaleyWemoManager
-
+import ai.haley.embedded.temphumiditysensor.HaleyTempHumiditySensorManager
 
 import groovy.json.JsonSlurper
 import io.vertx.groovy.ext.web.handler.StaticHandler
@@ -921,10 +921,13 @@ public class HaleyEmbeddedApp {
 
 							Map currently = weatherObj.currently
 							
-							float t = currently.temperature
+							//float t = currently.temperature
 							
-							float h = 100f * currently.humidity
-														
+							//float h = 100f * currently.humidity
+							
+							float t = HaleyTempHumiditySensorManager.getTemp()
+							float h = HaleyTempHumiditySensorManager.getHumidity()		
+										
 							println "Current NYC temp ${t} humidity ${h}"
 							
 							onTemperatureHumidityReady(t, h)							

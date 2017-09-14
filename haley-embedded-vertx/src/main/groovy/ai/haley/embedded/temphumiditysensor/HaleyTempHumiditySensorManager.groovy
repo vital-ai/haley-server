@@ -42,13 +42,18 @@ class HaleyTempHumiditySensorManager {
 		  //System.out.println("Done.");
 	}
 	
-	public static float getTemp() {
-		measureTempHumidity();
+	public static float getTempC() {
 		return temperature;
 	}
 	
+	public static float getTempF() {
+		return convertCelciusToFahrenheit(temperature);
+	}
+	
 	public static float getHumidity() {
-		measureTempHumidity();
 		return humidity;
+	}
+	private static float convertCelciusToFahrenheit(float temp){
+		return temp*1.8 + 32
 	}
 }

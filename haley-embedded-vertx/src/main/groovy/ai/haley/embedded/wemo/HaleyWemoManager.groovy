@@ -4,7 +4,7 @@ package ai.haley.embedded.wemo
 class HaleyWemoManager {
 
 	
-	public static String wemoBinary = "/anaconda/bin/wemo"
+	public static String wemoBinary = "wemo"
 	
 	
 

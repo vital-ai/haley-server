@@ -18,7 +18,7 @@ class HaleyTempHumiditySensorManager {
 		measureTempHumidity();
 	}
 	
-	public measureTempHumidity() throws Exception {
+	public static measureTempHumidity() throws Exception {
 		// TODO Auto-generated method stub
 		Runtime rt= Runtime.getRuntime();
 		Process p=rt.exec(PYTHON_COMMAND_LINE+PIN_NUM);
@@ -42,12 +42,12 @@ class HaleyTempHumiditySensorManager {
 		  //System.out.println("Done.");
 	}
 	
-	public float getTemp() {
+	public static float getTemp() {
 		measureTempHumidity();
 		return temperature;
 	}
 	
-	public float getHumidity() {
+	public static float getHumidity() {
 		measureTempHumidity();
 		return humidity;
 	}

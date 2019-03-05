@@ -2,7 +2,7 @@ package ai.haley.embedded.webserver
 
 import groovy.json.JsonOutput
 import io.vertx.core.Handler
-import io.vertx.groovy.ext.web.RoutingContext
+import io.vertx.ext.web.RoutingContext
 
 import java.text.DecimalFormat;
 

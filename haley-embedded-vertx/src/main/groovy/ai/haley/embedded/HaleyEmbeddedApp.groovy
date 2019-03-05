@@ -6,7 +6,7 @@ import ai.haley.embedded.wemo.HaleyWemoManager
 
 
 import groovy.json.JsonSlurper
-import io.vertx.groovy.ext.web.handler.StaticHandler
+import io.vertx.ext.web.handler.StaticHandler
 
 
 //import io.vertx.core.DeploymentOptions
@@ -23,8 +23,8 @@ import com.vitalai.aimp.domain.*
 //import ai.vital.vitalsigns.model.property.URIProperty
 
 
-import io.vertx.groovy.ext.web.Router
-import io.vertx.groovy.core.Vertx
+import io.vertx.ext.web.Router
+import io.vertx.core.Vertx
 
 
 import ai.haley.api.HaleyAPI

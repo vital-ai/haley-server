@@ -12,16 +12,9 @@
   <properties>
     <!-- the main class -->
     <exec.mainClass>ai.haley.embedded.HaleyEmbeddedApp</exec.mainClass>
-    
-    
- 
-     
-        <vital.version>0.2.304</vital.version>
-        
-        <netty.version>4.1.4.Final</netty.version>
- 
-    
-    
+    <vital.version>0.2.304</vital.version>
+    <netty.version>4.1.4.Final</netty.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
 
@@ -49,7 +42,7 @@
  
   <dependency>
    <groupId>ai.haley</groupId>
-  <artifactId>haley-client-groovy</artifactId>
+  <artifactId>haley-client-groovy35</artifactId>
   <version>0.0.1</version>
   
   </dependency>
@@ -57,28 +50,12 @@
   <dependency>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-web</artifactId>
-    <version>3.3.2</version>
+    <version>3.6.3</version>
   </dependency>
   
   <!-- DOMAINS START -->
   
   <!-- DOMAINS END -->
-  
-  
-  
-  <dependency>
- <groupId>io.vertx</groupId>
- <artifactId>vertx-core</artifactId>
- <version>3.3.2</version>
-</dependency>
-
-<dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-lang-groovy</artifactId>
-  <version>3.3.2</version>
-</dependency>
-  
-  
   
   
   <!--  
